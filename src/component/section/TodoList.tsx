@@ -56,7 +56,7 @@ const TodoList = () => {
     };
 
     return (
-        <div className="max-w-lg mx-auto p-4">
+        <div className="max-w-lg mx-auto p-4 shadow-md">
             <h1 className="text-3xl font-semibold text-center mb-4">Todo List</h1>
 
             <div className="flex mb-6">
