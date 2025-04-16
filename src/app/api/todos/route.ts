@@ -7,13 +7,17 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const { title } = await request.json();
+    try {
+        const { title } = await request.json();
+        if (!title) {
+            return NextResponse.json({ error: "Title is required" }, { status: 400 });
+        }
 
-  if (!title) {
-    return NextResponse.json({ error: 'Title is required' }, { status: 400 });
-  }
-
-  const [result]: any = await db.query('INSERT INTO todos (title) VALUES (?)', [title]);
-
-  return NextResponse.json({ id: result.insertId, title });
+        const [result]: any = await db.query('INSERT INTO todos (title) VALUES (?)', [title]);
+        const newTodo = { id: result.insertId, title };
+        return NextResponse.json(newTodo); // ส่ง response ที่เป็น JSON
+    } catch (error) {
+        console.error("Error in POST /api/todos:", error);
+        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    }
 }

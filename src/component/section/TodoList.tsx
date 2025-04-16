@@ -20,16 +20,27 @@ const TodoList = () => {
     // Add new todo
     const addTodo = async () => {
         if (!newTodo) return;
-        const response = await fetch("/api/todos", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ title: newTodo }),
-        });
-        const data = await response.json();
-        setTodos([...todos, data]); // Add new todo to the list
-        setNewTodo(""); // Clear input field
+    
+        try {
+            const response = await fetch("/api/todos", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ title: newTodo }),
+            });
+    
+            if (!response.ok) {
+                console.error("Failed to add todo:", response.statusText);
+                return;
+            }
+    
+            const data = await response.json();
+            setTodos([...todos, data]); // Add new todo to the list
+            setNewTodo(""); // Clear input field
+        } catch (error) {
+            console.error("Error adding todo:", error);
+        }
     };
 
     // Edit todo
