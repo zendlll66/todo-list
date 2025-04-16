@@ -1,33 +1,34 @@
 import { db } from '@/lib/db';
 import { NextResponse } from 'next/server';
 
-// DELETE (Delete todo)
-export async function DELETE(_: Request, context: unknown) {
-    const { params } = context as { params: { id: string } };
-    const { id } = params;
-    await db.query('DELETE FROM todos WHERE id = ?', [id]);
-    return NextResponse.json({ success: true });
+export async function PUT(request: Request, context: { params: { id: string } }) {
+    try {
+        const params = await context.params; // ใช้ await กับ context.params
+        const { id } = params; // ดึง id ออกมา
+        const { title } = await request.json();
+
+        if (!title) {
+            return NextResponse.json({ error: "Title is required" }, { status: 400 });
+        }
+
+        await db.query('UPDATE todos SET title = ? WHERE id = ?', [title, id]);
+        const updatedTodo = { id, title };
+        return NextResponse.json(updatedTodo);
+    } catch (error) {
+        console.error("Error in PUT /api/todos/[id]:", error);
+        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    }
 }
 
-// PUT (Edit todo)
-export async function PUT(
-    request: Request,
-    context: unknown
-) {
-    const { params } = context as { params: { id: string } };
-    const { id } = params;
-    const { title } = await request.json();
+export async function DELETE(request: Request, context: { params: { id: string } }) {
+    try {
+        const params = await context.params; // ใช้ await กับ context.params
+        const { id } = params; // ดึง id ออกมา
 
-    if (!title) {
-        return NextResponse.json({ error: "Title is required" }, { status: 400 });
+        await db.query('DELETE FROM todos WHERE id = ?', [id]);
+        return NextResponse.json({ message: "Todo deleted successfully" });
+    } catch (error) {
+        console.error("Error in DELETE /api/todos/[id]:", error);
+        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
-
-    const [result]: any = await db.query('UPDATE todos SET title = ? WHERE id = ?', [title, id]);
-
-    if (result.affectedRows === 0) {
-        return NextResponse.json({ error: "Todo not found" }, { status: 404 });
-    }
-
-    return NextResponse.json({ success: true, id, title });
 }
-
